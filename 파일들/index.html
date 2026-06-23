@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 점검일지 시스템</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="nav-bar">
+        <button id="back-btn" onclick="goBack()">◀ 이전</button>
+        <div id="page-title">점검일지</div>
+        <button id="save-btn" class="hidden" onclick="validateSave()">저장</button>
+    </div>
+
+    <div id="login-page" class="page">
+        <div class="card">
+            <h3>👤 현장 점검자 확인</h3>
+            <select id="inspector-select" class="main-select"></select>
+            <button onclick="verifyInspector()" class="next-btn">확인 후 진행하기 ▶</button>
+        </div>
+
+        <div class="card filter-card">
+            <h3>📊 누적 데이터 필터 추출 (CSV)</h3>
+            <div class="grid-filter">
+                <label>시작일: <input type="date" id="start-date"></label>
+                <label>종료일: <input type="date" id="end-date"></label>
+                <label>점검자: 
+                    <select id="filter-inspector"><option value="전체">전체</option></select>
+                </label>
+                <label>대분류: 
+                    <select id="filter-category"><option value="전체">전체</option></select>
+                </label>
+                <label>중분류: 
+                    <select id="filter-line"><option value="전체">전체</option></select>
+                </label>
+                <label>점검항목: 
+                    <select id="filter-item"><option value="전체">전체</option></select>
+                </label>
+            </div>
+            <button onclick="downloadCSV()" class="download-btn">🔍 조건에 부합하는 엑셀 다운로드</button>
+        </div>
+    </div>
+
+    <div id="home-page" class="page hidden">
+        <div id="category-list" class="menu-list"></div>
+    </div>
+
+    <div id="page-a" class="page hidden">
+        <div id="line-list" class="menu-list"></div>
+    </div>
+
+    <div id="page-b" class="page hidden">
+        <table id="inspection-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">NO</th>
+                    <th rowspan="2">점검항목</th>
+                    <th colspan="2">점검결과</th>
+                    <th colspan="2">특이사항</th>
+                </tr>
+                <tr>
+                    <th>이상X</th>
+                    <th>이상O</th>
+                    <th>특이사항 1</th>
+                    <th>특이사항 2</th>
+                </tr>
+            </thead>
+            <tbody id="inspection-body"></tbody>
+        </table>
+    </div>
+
+    <div id="alert-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>⚠️ 점검이 완료되지 않았습니다.</h3>
+            <p>선택되지 않은 점검 항목이 존재합니다.</p>
+            <div class="modal-btns">
+                <button onclick="closeModal()">확인</button>
+                <button onclick="forceSave()" class="danger-btn">강제저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
