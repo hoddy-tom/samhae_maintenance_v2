@@ -1,20 +1,41 @@
-// download.js 내부를 아래와 같이 수정
-const dbResult = await response.json();
-const rawLogs = dbResult.result || [];
-
-const cleanLogs = [];
-rawLogs.forEach(logStr => {
+export default async function handler(req, res) {
+  // CORS 설정
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  
   try {
-    const parsed = JSON.parse(logStr);
-    // [핵심] 저장된 데이터가 {logs: [...]} 구조라면, 내부 배열을 꺼내어 전체 리스트에 추가
-    if (parsed.logs && Array.isArray(parsed.logs)) {
-      cleanLogs.push(...parsed.logs);
-    } else {
-      cleanLogs.push(parsed);
-    }
-  } catch (e) {
-    console.error("데이터 파싱 오류", e);
-  }
-});
+    const url = process.env.KV_REST_API_URL;
+    const token = process.env.KV_REST_API_TOKEN;
 
-return res.status(200).json(cleanLogs);
+    if (!url || !token) {
+      return res.status(500).json({ error: "환경변수가 설정되지 않았습니다." });
+    }
+
+    // Upstash REST API 호출 (URL 바로 사용)
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['LRANGE', 'samhae_maintenance_logs', '0', '-1'])
+    });
+
+    if (!response.ok) {
+      return res.status(500).json({ error: "DB 응답 실패" });
+    }
+
+    const data = await response.json();
+    
+    // 결과 처리
+    const rawLogs = data.result || [];
+    const cleanLogs = rawLogs.map(logStr => {
+      try {
+        return JSON.parse(logStr);
+      } catch (e) { return null; }
+    }).filter(item => item !== null);
+
+    return res.status(200).json(cleanLogs);
+  } catch (error) {
+    return res.status(500).json({ error: "코드 실행 중 오류 발생" });
+  }
+}
